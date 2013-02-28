@@ -63,11 +63,11 @@ Backbone.Memento = (function(Backbone, _){
 
     function dropIgnored(attrs, restoreConfig){
       attrs = _.clone(attrs);
-      if (restoreConfig.hasOwnProperty("ignore") && restoreConfig.ignore.length > 0){
-        for(var index in restoreConfig.ignore){
-          var ignore = restoreConfig.ignore[index];
-          delete attrs[ignore];
-        }
+      if (_.has(restoreConfig, 'attributes') && restoreConfig.attributes.length > 0){
+          attrs = _.pick(attrs, restoreConfig.attributes);
+      }
+      if (_.has(restoreConfig, 'ignore') && restoreConfig.ignore.length > 0){
+          attrs = _.omit(attrs, restoreConfig.ignore);
       }
       return attrs;
     }
@@ -83,10 +83,8 @@ Backbone.Memento = (function(Backbone, _){
       // if the attr is found in the old set but not in
       // the new set, then it was remove in the new set
       for (var attr in oldAttrs){
-        if (oldAttrs.hasOwnProperty(attr)){
-          if (!newAttrs.hasOwnProperty(attr)){
+        if (_.has(oldAttrs, attr) && !_.has(newAttrs, attr)){
             removedAttrs.push(attr);
-          }
         }
       }
 
@@ -124,7 +122,7 @@ Backbone.Memento = (function(Backbone, _){
       restoreConfig = _.extend({}, config, restoreConfig);
       restoreState(previousState, restoreConfig);
     }
-      
+
   };
 
   // ----------------------------
@@ -140,7 +138,7 @@ Backbone.Memento = (function(Backbone, _){
     this.push = function(attrs){
       attributeStack.push(attrs);
     }
-    
+
     this.pop = function(restoreConfig){
       var oldAttrs = attributeStack.pop();
       return oldAttrs;
